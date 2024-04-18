@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Food Cart</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+<body>
+    {% set total_cost = 0 %}
+    {% for item in foodcart %}
+    <div class="item-container">
+        <h2 class="item-name">{{ item.item_name }}</h2>
+        <p class="item-price">Price: {{ item.price }}</p>
+        <p class="item-count">Count: {{ item.count }}</p>
+    </div>
+    {% set total_cost = total_cost + (item.price * item.count) %}
+    {% endfor %}
+    <div class="total-cost">
+        <h2>Total Cost: {{ total_cost }}</h2>
+    </div>
+</body>
+</html>

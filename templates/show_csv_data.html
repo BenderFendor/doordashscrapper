@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Budget Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="title">
+            <h1>Welcome To the Grocery Budget Calculator</h1>
+            <button class="cartbtn" onclick="window.location.href='/cart'">Go to Cart</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="fooditems">
+            {% for item in data %}
+            <div>
+                <h2>{{ item.item_name }}</h2>
+                <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
+                <p class="itemprice">Price: {{ item.price }}</p>
+                <form class="add-to-cart-form" action="{{ url_for('add_to_cart') }}" method="post">
+                    <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                    <input type="hidden" name="price" value="{{ item.price }}">
+                    <input type="submit" value="Add to Cart">
+                    <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
+                    <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="show-cart">
+            <h2>Shopping Cart</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart %}
+                    <tr>
+                        <td>{{ item.item_name }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price * item.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script>
+    $(document).ready(function(){
+        $(".add-to-cart-form").on("submit", function(e){
+            e.preventDefault();
+            $.ajax({
+                url: $(this).attr("action"),
+                method: "POST",
+                data: $(this).serialize(),
+                success: function(response){
+                    // Update the cart with the response
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
