@@ -1,0 +1,156 @@
+/* styles.css */
+
+/* Global styles */
+html {
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    margin: 0;
+    padding: 0;
+    background-color: #0c0c0c;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #a8a8a8;
+    color: white;
+    text-align: center;
+    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    padding: 20px;
+}
+
+.title h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.cartbtn {
+    padding: 15px;
+    background-color: #832418;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+}
+.cartbtn:hover {
+    background-color: #6a1b15;
+    color: #808080;
+}
+
+/* Food items styles */
+.fooditems {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.fooditems div {
+    border-radius: 0.5em;
+    padding: 2rem;
+    width: 300px;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+}
+
+.fooditems h2 {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.fooditems img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.fooditems .itemprice {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.fooditems form {
+    margin-top: 10px;
+    border: none;
+}
+
+.fooditems input[type="number"] {
+    width: 50px;
+    border: none;
+    padding: 20px;
+    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    background-color: #797979;
+    border-radius: 10px;
+}
+
+.fooditems input[type="submit"] {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 20px;
+    font-size: 15px;
+    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.fooditems input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.item-container {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+.item-name {
+    color: #333;
+    margin: 0;
+}
+
+.item-image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.item-price {
+    color: #666;
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.item-form {
+    display: flex;
+    align-items: center;
+}
+
+.item-count {
+    width: 50px;
+    border: none;
+    padding: 10px;
+    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    background-color: #797979;
+    border-radius: 10px;
+    color: white;
+    margin-right: 10px;
+}
+
+.item-submit {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 15px;
+    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.item-submit:hover {
+    background-color: #45a049;
+}
