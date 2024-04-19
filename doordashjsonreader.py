@@ -38,11 +38,12 @@ for item in legoRetailItems:
     price = item_data["price"]["display_string"]
     store_name = item_data["store_name"]
     image_uri = custom_data["image"]["remote"]["uri"]
-
+    
     print(f"item_name: {item_name} and price: {price} and image_uri: {image_uri}")
 
     # export to csv
     with open("testdoordashoutput.csv", "a") as file:
-        if empty := (file.tell() == 0):
+        empty = (file.tell() == 0)
+        if empty:
             file.write("item_name,price,image_url,image_urlpart2,image_urlpart3,image_urlpart4,image_urlpart5\n")
         file.write(f"{item_name},{price},{image_uri}\n")
