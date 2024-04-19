@@ -3,6 +3,9 @@
 ## Description
 This project is a web scraper for DoorDash. It's designed to extract information from DoorDash for a grocery list webserver
 
+It uses flask for most of the back and frontend with a little js for ajax features mostly
+
+
 ## Installation
 To install this project, follow these steps:
 
@@ -13,7 +16,9 @@ To install this project, follow these steps:
 ## Usage
 To use this project, follow these steps:
 
-1. Run the Webserver: `python webserver.py`
+1. Run the Doordashscraper.py 
+2. Then run the doordashjsonreader.py
+3. Run the Webserver: `python webserver.py`
 
 If you want to scrape Door Dash, use the doordashscraper.py then the doordashjsonreader.py
 
