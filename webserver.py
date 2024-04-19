@@ -1,8 +1,14 @@
 from flask import Flask, flash, jsonify, render_template, request, redirect, url_for, session
+from fuzzywuzzy import fuzz
 import csv
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # replace with your secret key
+
+@app.route('/clear_session')
+def clear_session():
+    session.clear()
+    return "Session cleared"
 
 @app.route('/')
 def showData():
@@ -22,13 +28,29 @@ def showData():
         item['count'] = 0
 
     # Store data_list in the session
-    session['cart'] = data_list
+    session['foodlist'] = data_list
 
     if data_list:
         first_item = data_list[0]
         print(f"First item: Name={first_item['item_name']}, Price={first_item['price']}, Cost={first_item['image_url']}")
     
     return render_template('show_csv_data.html', data=data_list)
+
+# Define a function to perform fuzzy matching
+def fuzzy_match(keyword, item_name):
+    threshold = 70  # You can adjust this threshold as per your requirement
+    return fuzz.ratio(keyword.lower(), item_name.lower()) >= threshold
+
+@app.route('/search', methods=['POST'])
+def search():
+    keyword = request.form.get('keyword')
+
+    # Get data_list from the session
+    data_list = session.get('cart', [])
+
+    print(data_list)
+
+    return render_template('show_csv_data.html')#,data=filtered_data)
 
 @app.route('/update_count', methods=['POST'])
 def update_count():
@@ -65,19 +87,31 @@ def add_to_cart():
     item_name = request.form.get('item_name')
     price = request.form.get('price')
     count = request.form.get('count')
+    image_url = request.form.get('image_url')
 
-    # Add the item to the cart (this will depend on how your cart is implemented)
+    # Add the item to the cart
     cart = {
         'item_name': item_name,
         'price': price,
+        'image_url': image_url,
         'count': count
     }
 
     print(f"Added item to cart: Name={item_name}, Price={price}, Count={count}")
     
-    # Get the existing cart from the session, add the new item to it, and store it back in the session
+    # Get the existing cart from the session
     foodcart = session.get('cart', [])
-    foodcart.append(cart)
+
+    # Check if the item is already in the cart
+    for item in foodcart:
+        if item['item_name'] == item_name:
+            print("Item already in cart. Updating count.")
+            item['count'] = count
+            break
+    else:
+        # If the item is not in the cart, add it
+        foodcart.append(cart)
+        
     session['cart'] = foodcart
 
     # Print the updated cart
@@ -86,10 +120,12 @@ def add_to_cart():
     # Redirect to the page that shows the cart
     return redirect(url_for('show_cart'))
 
-@app.route('/cart')
+@app.route('/show_cart')
 def show_cart():
-    print(session.get('foodcart', []))
-    return render_template('cart.html', cart=session.get('foodcart', []))
+    foodcart = session.get('cart', [])
+    total_cost = sum(float(item['price'].replace('$', '')) * int(item['count']) for item in foodcart)
+    print("Total cost:", total_cost)
+    return render_template('cart.html', foodcart=foodcart, total_cost=total_cost)
 
 if __name__ == '__main__':
     app.run(debug=True)

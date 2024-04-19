@@ -14,8 +14,15 @@
     <header>
         <div class="title">
             <h1>Welcome To the Grocery Budget Calculator</h1>
-            <button class="cartbtn" onclick="window.location.href='/cart'">Go to Cart</button>
+            <button class="cartbtn" onclick="window.location.href='/show_cart'">Go to Cart</button>
         </div>
+        <div class="headerimg">
+            <img src="{{ url_for('static', filename='grocery.jpg') }}" alt="Grocery Store">
+        <div class="search">
+            <form action="{{ url_for('search') }}" method="post">
+                <input type="text" name="search" id="search" placeholder="Search for an item">
+                <input type="submit" value="Search">
+            </form>
     </header>
 
     <main>
@@ -28,6 +35,7 @@
                 <form class="add-to-cart-form" action="{{ url_for('add_to_cart') }}" method="post">
                     <input type="hidden" name="item_name" value="{{ item.item_name }}">
                     <input type="hidden" name="price" value="{{ item.price }}">
+                    <input type="hidden" name="image_url" value="{{ item.image_url }}"> <!-- Make sure you have this line -->
                     <input type="submit" value="Add to Cart">
                     <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
                     <input type="hidden" name="item_name" value="{{ item.item_name }}">

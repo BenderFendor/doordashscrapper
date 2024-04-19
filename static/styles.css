@@ -13,13 +13,16 @@ html {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #a8a8a8;
+    background-color: #1f1f1f;
     color: white;
     text-align: center;
     box-shadow: #0c0c0c 0px 5px 5px -5px;
     padding: 20px;
 }
-
+body
+{
+    overflow-y: scroll;
+}
 .title h1 {
     font-size: 24px;
     margin: 0;
@@ -44,6 +47,12 @@ html {
     flex-wrap: wrap;
     justify-content: space-between;
     padding: 20px;
+    width: 60%;
+    margin: 0 auto;
+    background-color: #f1f1f1;
+    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    border-radius: 10px;
+    margin-top: 10%;
 }
 
 .fooditems div {
@@ -100,11 +109,28 @@ html {
     background-color: #45a049;
 }
 
-.item-container {
-    background-color: #fff;
+.cart
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 20px;
+    width: 60%;
+    margin: 0 auto;
+    background-color: #f1f1f1;
+    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    border-radius: 10px;
+    margin-top: 10%;
+}
+
+.item-container {
+    border-radius: 0.5em;
+    padding: 2rem;
+    width: 400px;
     margin-bottom: 20px;
+    background-color: #fff;
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    
 }
 
 .item-name {
@@ -112,14 +138,13 @@ html {
     margin: 0;
 }
 
-.item-image {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
+.item-container img {
+    width: 100%;
+    height: auto;
 }
 
 .item-price {
-    color: #666;
+    color: #f1f1f1;
     font-size: 18px;
     margin: 10px 0;
 }
@@ -138,6 +163,17 @@ html {
     border-radius: 10px;
     color: white;
     margin-right: 10px;
+}
+
+.item-cardbottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #1f1f1f;
+    color: white;
+    text-align: center;
+    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    padding: 20px;
 }
 
 .item-submit {

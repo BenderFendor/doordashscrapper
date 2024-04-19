@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Search Results</h1>
+
+    {% for result in results %}
+    <div>
+        <h2>{{ result.item_name }}</h2>
+        <img src="{{ result.image_url }}" alt="{{ result.item_name }}">
+        <p>Price: {{ result.price }}</p>
+    </div>
+    {% else %}
+    <p>No results found.</p>
+    {% endfor %}
+
+    <a href="{{ url_for('showData') }}">Back to Home</a>
+</body>
+</html>

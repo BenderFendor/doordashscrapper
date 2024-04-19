@@ -6,18 +6,29 @@
         <title>Food Cart</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
-<body>
-    {% set total_cost = 0 %}
-    {% for item in foodcart %}
-    <div class="item-container">
-        <h2 class="item-name">{{ item.item_name }}</h2>
-        <p class="item-price">Price: {{ item.price }}</p>
-        <p class="item-count">Count: {{ item.count }}</p>
+<body
+    <header>
+        <div class="title">
+            <h1>Food Cart</h1>
+            <button class="cartbtn" onclick="window.location.href='/'">Go Back</button>
+        </div>
+        <div class="headerimg">
+            <img src="{{ url_for('static', filename='grocery.jpg') }}" alt="Grocery Store">
+    </header>
+    <div class="cart">
+        {% for item in foodcart %}
+        <div class="item-container">
+            <h2 class="item-name">{{ item.item_name }}</h2>
+            <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
+            <div class="item-cardbottom">
+                <p class="item-price">Price: {{ item.price }}</p>
+                <p class="item-count">Count: {{ item.count }}</p>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% set total_cost = total_cost + (item.price * item.count) %}
-    {% endfor %}
     <div class="total-cost">
-        <h2>Total Cost: {{ total_cost }}</h2>
+        <h2>The Total Cost Of This Cart is ${{ total_cost }}</h2>
     </div>
 </body>
 </html>
