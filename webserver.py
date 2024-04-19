@@ -16,16 +16,14 @@ def showData():
     data_file_path = 'testdoordashoutput.csv'
     data_list = []
     with open(data_file_path, mode='r', encoding='latin1') as file:
-        lines = file.readlines()
-        headers = lines[0].strip().split(',')
-        for line in lines[1:]:
-            values = line.strip().split(',')
+        reader = csv.reader(file)
+        headers = next(reader)
+        for values in reader:
             item = dict(zip(headers, values))
             data_list.append(item)
     
     for item in data_list:
         item['image_url'] = ','.join([item['image_url'], item['image_urlpart2'], item['image_urlpart3'], item['image_urlpart4']])
-        item['count'] = 0
 
     # Store data_list in the session
     session['foodlist'] = data_list
@@ -33,8 +31,13 @@ def showData():
     if data_list:
         first_item = data_list[0]
         print(f"First item: Name={first_item['item_name']}, Price={first_item['price']}, Cost={first_item['image_url']}")
+
+    # Get cart data from the session
+    foodcart = session.get('cart', [])
     
-    return render_template('show_csv_data.html', data=data_list)
+    total_cost = sum(float(item['price'].replace('$', '')) * int(item['count']) for item in foodcart)
+
+    return render_template('show_csv_data.html', data=data_list,foodcart=foodcart,total_cost = total_cost)
 
 # Define a function to perform fuzzy matching
 def fuzzy_match(keyword, item_name):
@@ -51,6 +54,16 @@ def search():
     print(data_list)
 
     return render_template('show_csv_data.html')#,data=filtered_data)
+
+@app.route('/get_cart')
+def get_cart():
+    foodcart = session.get('cart', [])
+    return jsonify(foodcart)
+
+@app.route('/clear_cart')
+def clear_cart():
+    session['cart'] = []  # Clear the cart by setting it to an empty list
+    return jsonify({'status': 'success'})
 
 @app.route('/update_count', methods=['POST'])
 def update_count():
@@ -124,7 +137,6 @@ def add_to_cart():
 def show_cart():
     foodcart = session.get('cart', [])
     total_cost = sum(float(item['price'].replace('$', '')) * int(item['count']) for item in foodcart)
-    print("Total cost:", total_cost)
     return render_template('cart.html', foodcart=foodcart, total_cost=total_cost)
 
 if __name__ == '__main__':

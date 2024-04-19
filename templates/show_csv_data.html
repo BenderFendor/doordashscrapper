@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grocery Budget Calculator</title>
+    <title>Frugally Dashing</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <script src="static/updatecart.js"></script>
+    <script src="static/clearcart.js"></script>
 </head>
 <body>
     <header>
         <div class="title">
-            <h1>Welcome To the Grocery Budget Calculator</h1>
+            <h1>Frugal Dash</h1>
             <button class="cartbtn" onclick="window.location.href='/show_cart'">Go to Cart</button>
         </div>
-        <div class="headerimg">
-            <img src="{{ url_for('static', filename='headerimg.jpg') }}" alt="Grocery Store">
+            <img class="headerimg" src="{{ url_for('static', filename='headerimg.jpg') }}" alt="Grocery Store">
         <div class="search">
             <form action="{{ url_for('search') }}" method="post">
                 <input type="text" name="search" id="search" placeholder="Search for an item">
@@ -36,38 +38,47 @@
                     <input type="hidden" name="item_name" value="{{ item.item_name }}">
                     <input type="hidden" name="price" value="{{ item.price }}">
                     <input type="hidden" name="image_url" value="{{ item.image_url }}"> <!-- Make sure you have this line -->
-                    <input type="submit" value="Add to Cart">
+                    <input type="submit" value="Add to Cart" onclick="updatecart()">
                     <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
                     <input type="hidden" name="item_name" value="{{ item.item_name }}">
                 </form>
             </div>
             {% endfor %}
         </div>
+        
+        <!-- Todo add the feature that you can remove each item from the cart by adding a remove button next to each item in the cart. -->
 
-        <div class="show-cart">
-            <h2>Shopping Cart</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in cart %}
-                    <tr>
-                        <td>{{ item.item_name }}</td>
-                        <td>{{ item.price }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ item.price * item.quantity }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="show-cart">  
+            <div class="cartheader">
+                <h2>Shopping Cart</h2>
+            </div>
+            <div class="cartbg">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in foodcart %}
+                        <tr>
+                            <td>{{ item.item_name }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.count }}</td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="showcarttotal"
+                <p class="carttotal">The Total Cost Of This Cart is ${{ total_cost }}</p>
+                <button class="clearcart" onclick="clearCart()">Clear Cart</button>
+            </div>
         </div>
-    </main>
+        </main>
     <script>
     $(document).ready(function(){
         $(".add-to-cart-form").on("submit", function(e){

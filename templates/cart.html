@@ -12,8 +12,6 @@
             <h1>Food Cart</h1>
             <button class="cartbtn" onclick="window.location.href='/'">Go Back</button>
         </div>
-        <div class="headerimg">
-            <img src="{{ url_for('static', filename='grocery.jpg') }}" alt="Grocery Store">
     </header>
     <div class="cart">
         {% for item in foodcart %}

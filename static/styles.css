@@ -1,91 +1,119 @@
 /* styles.css */
 
 /* Global styles */
+:root
+{
+    --textcolor: rgb(255, 247, 226);
+    --accentlight: #8fb996ff;
+    --accentbg: rgb(151, 141, 112);
+    --accentcolor: #415d43ff;
+    --bgcolor: #111d13ff;    
+}
+
 html {
     font-family: "Inter", sans-serif;
     font-optical-sizing: auto;
     margin: 0;
     padding: 0;
-    background-color: #0c0c0c;
+    background-color: var(--bgcolor);
 }
 
 .title {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #1f1f1f;
-    color: white;
+    background-color: var(--accentbg);
+    color: var(--textcolor);
     text-align: center;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
     padding: 20px;
 }
+
 body
 {
     overflow-y: scroll;
 }
+
 .title h1 {
-    font-size: 24px;
+    font-size: 45px;
     margin: 0;
 }
-.headerimg img
+
+.headerimg
 {
     width: 100%;
-    height: 20%;
+    height: 25rem;
     object-fit: cover;
-    filter:blur(5px);
+    filter:blur(10px);
 }
+
 .search
 {
     display: flex;
     justify-content: center;
     width: 100%;
     padding: 20px;
-    background-color: #1f1f1f;
+    background-color: var(--accentbg);
 }
+
 .search form
 {
     width: 100% ;
 }
+
 .search input[type="text"] {
     padding: 10px;
     width: 50%;
     border: none;
     border-radius: 5px;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
     margin-right: 10px;
 }
+
 .search input[type="submit"] {
     padding: 10px;
-    background-color: #832418;
-    color: white;
+    background-color: var(--accentcolor);
+    color: var(--textcolor);
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
+
 .cartbtn {
     padding: 15px;
-    background-color: #832418;
-    color: white;
+    background-color: var(--accentcolor);
+    color: var(--textcolor);
     font-weight: bold;
     border: none;
     border-radius: 5px;
 }
-.cartbtn:hover {
-    background-color: #6a1b15;
-    color: #808080;
-}
 
-/* Food items styles */
-.fooditems {
+.cartbtn:hover {
+    background-color: var(--accentlight);
+    color: var(--accentcolor);
+}
+main {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+}
+/* Food items styles */
+.fooditems {
+    font-family: 'EB Garamond', serif;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
     padding: 20px;
-    width: 75%;
+    width: 60%;
     margin: 0 auto;
-    background-color: #f1f1f1;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    background-color: var(--accentlight);
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
     border-radius: 10px;
     margin-top: 10%;
 }
@@ -95,11 +123,12 @@ body
     padding: 2rem;
     width: 300px;
     margin-bottom: 20px;
-    background-color: #ffffff;
+    background-color: var(--textcolor);
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
 }
 
 .fooditems h2 {
-    font-size: 18px;
+    font-size: 22px;
     margin: 10px 0;
 }
 
@@ -124,26 +153,69 @@ body
     width: 50px;
     border: none;
     padding: 20px;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
-    background-color: #797979;
+    font-size: 20px;
+    font-family: 'EB Garamond', serif;
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
+    background-color: var(--accentcolor);
     border-radius: 10px;
 }
 
 .fooditems input[type="submit"] {
-    background-color: #4caf50;
-    color: white;
+    background-color: var(--accentlight);
+    color: var(--textcolor);
     border: none;
     padding: 20px;
-    font-size: 15px;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    font-size: 20px;
+    font-family: 'EB Garamond', serif;
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
     border-radius: 10px;
     cursor: pointer;
 }
 
 .fooditems input[type="submit"]:hover {
-    background-color: #45a049;
+    background-color: var(--accentbg);
 }
 
+.show-cart
+{
+    font-family: 'EB Garamond', serif;
+    margin-top: 10%;
+    height: min-content;
+    margin-right: 20px;
+}
+.cartbg
+{
+    background-color: var(--textcolor);
+    color: var(--accentcolor);
+    padding: 15px;
+}
+.cartheader
+{
+    padding: 20px;
+    text-align: center;
+    font-size: 20px;
+    background-color: var(--accentbg);
+    margin: 0px !important;
+    border-radius: 10px 10px 0px 0px;
+}
+.showcarttotal
+{
+    display: flex;
+    background-color: var(--accentlight);
+    padding: 5px;
+    text-align: center;
+    border-radius: 0px 0px 10px 10px;
+}
+.clearcart
+{
+    background-color: var(--accentcolor);
+    color: var(--textcolor);
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
 .cart
 {
     display: flex;
@@ -152,8 +224,8 @@ body
     padding: 20px;
     width: 75%;
     margin: 0 auto;
-    background-color: #f1f1f1;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    background-color: var(--accentlight);
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
     border-radius: 10px;
     margin-top: 10%;
 }
@@ -163,13 +235,13 @@ body
     padding: 2rem;
     width: 400px;
     margin-bottom: 20px;
-    background-color: #fff;
+    background-color: var(--textcolor);
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
     
 }
 
 .item-name {
-    color: #333;
+    color: var(--accentcolor);
     margin: 0;
 }
 
@@ -179,7 +251,7 @@ body
 }
 
 .item-price {
-    color: #f1f1f1;
+    color: var(--accentlight);
     font-size: 18px;
     margin: 10px 0;
 }
@@ -193,10 +265,10 @@ body
     width: 50px;
     border: none;
     padding: 10px;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
-    background-color: #797979;
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
+    background-color: var(--accentcolor);
     border-radius: 10px;
-    color: white;
+    color: var(--textcolor);
     margin-right: 10px;
 }
 
@@ -204,24 +276,24 @@ body
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #1f1f1f;
-    color: white;
+    background-color: var(--accentbg);
+    color: var(--textcolor);
     text-align: center;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
     padding: 20px;
 }
 
 .item-submit {
-    background-color: #4caf50;
-    color: white;
+    background-color: var(--accentlight);
+    color: var(--textcolor);
     border: none;
     padding: 10px 20px;
     font-size: 15px;
-    box-shadow: #0c0c0c 0px 5px 5px -5px;
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
     border-radius: 10px;
     cursor: pointer;
 }
 
 .item-submit:hover {
-    background-color: #45a049;
+    background-color: var(--accentbg);
 }
