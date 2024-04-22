@@ -13,20 +13,27 @@
             <button class="cartbtn" onclick="window.location.href='/'">Go Back</button>
         </div>
     </header>
-    <div class="cart">
-        {% for item in foodcart %}
-        <div class="item-container">
-            <h2 class="item-name">{{ item.item_name }}</h2>
-            <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
-            <div class="item-cardbottom">
-                <p class="item-price">Price: {{ item.price }}</p>
-                <p class="item-count">Count: {{ item.count }}</p>
+    {% if foodcart|length == 0 %}
+        <div class="cart">
+            <h2>Your cart is empty</h2>
+            <p>Go back to the main page to add items to your cart</p>
+    {% else %}
+        <div class="cart">
+            {% for item in foodcart %}
+            <div class="item-container">
+                <h2 class="item-name">{{ item.item_name }}</h2>
+                <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
+                <div class="item-cardbottom">
+                    <p class="item-price">Price: {{ item.price }}</p>
+                    <p class="item-count">Count: {{ item.count }}</p>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    <div class="total-cost">
-        <h2>The Total Cost Of This Cart is ${{ total_cost }}</h2>
-    </div>
+        <div class="total-cost">
+            <h2>The Total Cost Of This Cart is ${{ total_cost }}</h2>
+        </div>
+    {% endif %}
+
 </body>
 </html>

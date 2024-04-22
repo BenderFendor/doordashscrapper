@@ -10,41 +10,102 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
-    <script src="static/updatecart.js"></script>
-    <script src="static/clearcart.js"></script>
+    <script src="{{ url_for('static', filename='updatecart.js') }}""></script>
+    <script src="{{ url_for('static', filename='addToCart.js') }}""></script>
+    <script src="{{ url_for('static', filename='clearcart.js') }}""></script>
+    <script src="{{ url_for('static', filename='grained.js') }}""></script>
 </head>
 <body>
     <header>
         <div class="title">
-            <h1>Frugal Dash</h1>
             <button class="cartbtn" onclick="window.location.href='/show_cart'">Go to Cart</button>
         </div>
-            <img class="headerimg" src="{{ url_for('static', filename='headerimg.jpg') }}" alt="Grocery Store">
-        <div class="search">
-            <form action="{{ url_for('search') }}" method="post">
-                <input type="text" name="search" id="search" placeholder="Search for an item">
-                <input type="submit" value="Search">
-            </form>
     </header>
 
     <main>
-        <div class="fooditems">
-            {% for item in data %}
-            <div>
-                <h2>{{ item.item_name }}</h2>
-                <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
-                <p class="itemprice">Price: {{ item.price }}</p>
-                <form class="add-to-cart-form" action="{{ url_for('add_to_cart') }}" method="post">
-                    <input type="hidden" name="item_name" value="{{ item.item_name }}">
-                    <input type="hidden" name="price" value="{{ item.price }}">
-                    <input type="hidden" name="image_url" value="{{ item.image_url }}"> <!-- Make sure you have this line -->
-                    <input type="submit" value="Add to Cart" onclick="updatecart()">
-                    <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
-                    <input type="hidden" name="item_name" value="{{ item.item_name }}">
-                </form>
+        <div id="grainbackground" class="grainbackground">
+            <div class="subheader">
+                <img class="headerimg" src="{{ url_for('static', filename='headerimg.jpg') }}" alt="Grocery Store">
+                <h2>Welcome to Frugal Dash</h2>
+                <p>This program calculates the cost of your groceries based on stored information from various stores, such as Aidi or any other store of your choice. It provides an estimate of your grocery expenses for a specific duration, whether it's a week, a month, or a year. This program calculates the cost of your groceries based on stored information from various stores, such as Aidi or any other store of your choice. It provides an estimate of your grocery expenses for a specific duration, whether it's a week, a month, or a year.</p>
             </div>
-            {% endfor %}
+ 
+            <div class="fooditems">
+                <div class="search">
+                    <form id="searchForm">
+                        <input type="text" name="search" id="search" placeholder="Search for an item">  
+                        <input type="submit" value="Search">
+                    </form>
+                </div>
+                <div class="allitems">
+            <!-- Have this search go over all the boxes some how with css -->
+                <p id="no-items-found">No items found</p>
+
+                {% for item in data %}
+                <div>
+                    <h2 class="itemname">{{ item.item_name }}</h2>
+                    <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
+                    <p class="itemprice">Price: {{ item.price }}</p>
+                    <form class="add-to-cart-form">
+                        <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                        <input type="hidden" name="price" value="{{ item.price }}">
+                        <input type="hidden" name="image_url" value="{{ item.image_url }}"> <!-- Make sure you have this line -->     
+                        <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
+                        <input type="button" class = "addtocart" value="Add to cart" onclick="addToCart('{{ item.item_name }}', '{{ item.price }}','{{ item.url }}',document.getElementById('count_{{ item.item_name }}').value)">
+                        <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                    </form>
+                </div>
+              {% endfor %}
+            </div>
         </div>
+        <script>
+            document.getElementById('searchForm').addEventListener('submit', function(event) {
+                event.preventDefault();  // Prevent the form from being submitted normally
+
+                var searchQuery = document.getElementById('search').value;  // Get the search query
+
+                console.log('Search query:', searchQuery)
+                console.log('Full URL with encoded search query:', 'http://localhost:5000/search?search=' + encodeURIComponent(searchQuery));
+                // Send an AJAX request to the server
+                fetch('/search?search=' + encodeURIComponent(searchQuery), {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Data:', data);
+                    // Get all items
+                    let allItems = document.querySelectorAll('.allitems > div');
+
+                    // Convert the NodeList to an array and loop through each item
+                    Array.from(allItems).forEach(item => {
+                        // Show all items to reset search
+                        item.style.display = 'block';
+                        // Get the item name from the h2.itemname element's text content
+                        let itemName = item.querySelector('.itemname').textContent;
+
+                        // Check if the item is in the data
+                        let itemInData = data.some(dataItem => dataItem.item_name === itemName);
+
+                        // If the item is not in the data, hide it
+                        if (!itemInData) {
+                            item.style.display = 'none';
+                        }
+                        
+                        // If no items were found, show a message
+                        if (data.length === 0) {
+                            document.getElementById('no-items-found').style.display = 'block';
+                            document.getElementById('no-items-found').textContent = 'No items found that matched with the search query ' + searchQuery;
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            });
+        </script>
         
         <!-- Todo add the feature that you can remove each item from the cart by adding a remove button next to each item in the cart. -->
 
@@ -79,23 +140,23 @@
             </div>
         </div>
         </main>
-    <script>
-    $(document).ready(function(){
-        $(".add-to-cart-form").on("submit", function(e){
-            e.preventDefault();
-            $.ajax({
-                url: $(this).attr("action"),
-                method: "POST",
-                data: $(this).serialize(),
-                success: function(response){
-                    // Update the cart with the response
-                },
-                error: function(error){
-                    console.log(error);
+        <script>
+            window.onload = function() {
+                var options = {
+                "animate": false,
+                "patternWidth": 388.24,
+                "patternHeight": 382.84,
+                "grainOpacity": 0.1,
+                "grainDensity": 1,
+                "grainWidth": 1,
+                "grainHeight": 1
                 }
-            });
-        });
-    });
-    </script>
-</body>
-</html>
+                grained("#grainbackground", options);
+
+                /*
+                background-color :rgb(41, 46, 49)
+                */
+            };
+        </script>
+        </body>
+        </html>
