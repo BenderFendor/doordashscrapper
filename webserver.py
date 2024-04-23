@@ -27,7 +27,9 @@ def showData():
             data_list.append(item)
     
     for item in data_list:
-        item['image_url'] = ','.join([item['image_url'], item['image_urlpart2'], item['image_urlpart3'], item['image_urlpart4']])
+        item['image_url'] = ','.join([item['image_url'], item['image_urlpart2'], item['image_urlpart3'], item
+        ['image_urlpart4']])
+        item['count'] = 1
 
     # Store data_list in the session
     session['foodlist'] = data_list
@@ -165,7 +167,7 @@ def show_cart():
     if not foodcart:
         return render_template('cart.html', foodcart=foodcart, total_cost=0,is_empty=True)
     
-    total_cost = sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None)['price'] is not None
+    total_cost = sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None)
     return render_template('cart.html', foodcart=foodcart, total_cost=total_cost)
 
 @app.route('/search', methods=['GET'])

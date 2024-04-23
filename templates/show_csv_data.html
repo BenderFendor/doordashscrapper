@@ -29,33 +29,63 @@
                 <h2>Welcome to Frugal Dash</h2>
                 <p>This program calculates the cost of your groceries based on stored information from various stores, such as Aidi or any other store of your choice. It provides an estimate of your grocery expenses for a specific duration, whether it's a week, a month, or a year. This program calculates the cost of your groceries based on stored information from various stores, such as Aidi or any other store of your choice. It provides an estimate of your grocery expenses for a specific duration, whether it's a week, a month, or a year.</p>
             </div>
- 
-            <div class="fooditems">
-                <div class="search">
-                    <form id="searchForm">
-                        <input type="text" name="search" id="search" placeholder="Search for an item">  
-                        <input type="submit" value="Search">
-                    </form>
-                </div>
-                <div class="allitems">
-            <!-- Have this search go over all the boxes some how with css -->
-                <p id="no-items-found">No items found</p>
+            <div class="foodandcartcontainer">
+                <div class="show-cart">  
+                    <div class="cartheader">
+                        <h2>Shopping Cart</h2>
+                    </div>
+                    <div class="cartbg">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in foodcart %}
+                                <tr>
+                                    <td>{{ item.item_name }}</td>
+                                    <td>{{ item.price }}</td>
+                                    <td>{{ item.count }}</td>
+                                </tr>
+                                {% endfor %}
+        
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="showcarttotal"
+                        <p class="carttotal">The Total Cost Of This Cart is ${{ total_cost }}</p>
+                        <button class="clearcart" onclick="clearCart()">Clear Cart</button>
+                    </div>
+            </div>
+                <div class="fooditems">
+                    <div class="search">
+                        <form id="searchForm">
+                            <input type="text" name="search" id="search" placeholder="Search for an item">  
+                        </form>
+                    </div>
+                    <div class="allitems">
+                <!-- Have this search go over all the boxes some how with css -->
+                    <p id="no-items-found">No items found</p>
 
-                {% for item in data %}
-                <div>
-                    <h2 class="itemname">{{ item.item_name }}</h2>
-                    <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
-                    <p class="itemprice">Price: {{ item.price }}</p>
-                    <form class="add-to-cart-form">
-                        <input type="hidden" name="item_name" value="{{ item.item_name }}">
-                        <input type="hidden" name="price" value="{{ item.price }}">
-                        <input type="hidden" name="image_url" value="{{ item.image_url }}"> <!-- Make sure you have this line -->     
-                        <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
-                        <input type="button" class = "addtocart" value="Add to cart" onclick="addToCart('{{ item.item_name }}', '{{ item.price }}','{{ item.url }}',document.getElementById('count_{{ item.item_name }}').value)">
-                        <input type="hidden" name="item_name" value="{{ item.item_name }}">
-                    </form>
+                    {% for item in data %}
+                    <div>
+                        <h2 class="itemname">{{ item.item_name }}</h2>
+                        <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
+                        <p class="itemprice">Price: {{ item.price }}</p>
+                        <form class="add-to-cart-form">
+                            <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                            <input type="hidden" name="price" value="{{ item.price }}">
+                            <input type="hidden" name="image_url" value="{{ item.image_url }}"> <!-- Make sure you have this line -->     
+                            <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
+                            <input type="button" class = "addtocart" value="Add to cart" onclick="addToCart('{{ item.item_name }}', '{{ item.price }}','{{ item.url }}',document.getElementById('count_{{ item.item_name }}').value)">
+                            <input type="hidden" name="item_name" value="{{ item.item_name }}">
+                        </form>
+                    </div>
+                {% endfor %}
                 </div>
-              {% endfor %}
             </div>
         </div>
         <script>
@@ -109,35 +139,7 @@
         
         <!-- Todo add the feature that you can remove each item from the cart by adding a remove button next to each item in the cart. -->
 
-        <div class="show-cart">  
-            <div class="cartheader">
-                <h2>Shopping Cart</h2>
-            </div>
-            <div class="cartbg">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in foodcart %}
-                        <tr>
-                            <td>{{ item.item_name }}</td>
-                            <td>{{ item.price }}</td>
-                            <td>{{ item.count }}</td>
-                        </tr>
-                        {% endfor %}
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="showcarttotal"
-                <p class="carttotal">The Total Cost Of This Cart is ${{ total_cost }}</p>
-                <button class="clearcart" onclick="clearCart()">Clear Cart</button>
-            </div>
+     
         </div>
         </main>
         <script>

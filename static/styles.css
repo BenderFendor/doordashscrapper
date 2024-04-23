@@ -82,6 +82,7 @@ body
     text-align: center;
     font-weight: normal;
     height: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 .subheader p
 {
@@ -93,11 +94,12 @@ body
     font-weight: normal;
     width: 50%;
     margin: 0 auto; /* Add this line to center the element */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
 }
 .search {
+    display: inline-block;
     position: relative;
-    width: 1112px;
-    z-index: 2; /* Increase z-index */
 }
 .headerimg {
     position: relative;
@@ -108,42 +110,26 @@ body
     filter:blur(10px)
     opacity(0.3);
 }
-.search form
-{
-    z-index: 999;
-}
+
 
 .search input[type="text"] {
     font-family: 'Inter', sans-serif;
     font-weight: bold;
-    padding: 20px;
-    width: 100%;
+    padding: 30px;
+    margin: 0 auto;
     border: none;
     border-radius: 5px;
+    width: 104vb;
     background-color: var(--bgcolortrans);
     font-size: 15px;
     z-index: 999;
     backdrop-filter: blur(10px);
     color: var(--textcolor);
 }
-
-.search input[type="submit"] {
-    padding: 15px;
-    background-color: var(--accentcolor);
-    color: var(--textcolor);
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    box-shadow: 0 4px 14px 0 rgba(175, 238, 162, 0.39);
-    transition: background 0.2s ease,color 0.2s ease,box-shadow 0.2s ease;
-    z-index: 999;
-}
-.search input[type="submit"]:hover {
-    box-shadow: 0 6px 20px rgba(24, 214, 81, 0.23);
-    background-color: var(--accentlight);
-    color: var(--accentcolor);
+@media (orientation: portrait) {
+    .search input[type="text"] {
+        width: 31.8vb;
+    }
 }
 #no-items-found
 {
@@ -179,6 +165,12 @@ main {
     flex-wrap: wrap;
     justify-content: space-between;
 }
+.foodandcartcontainer
+{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
 /* Food items styles */
 .fooditems
 {
@@ -189,20 +181,20 @@ main {
     border-radius: 10px;
     backdrop-filter: blur(20px);
     margin: 0 auto;
-    margin-top: 17%;
+    margin-top: 25rem;
 
 }
 .allitems {
     font-family: 'EB Garamond', serif;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
 .allitems div {
     border-radius: 0.5em;
     padding: 2rem;
-    width: 300px;
+    width: 70%;
     margin-bottom: 20px;
     background-color: var(--textcolor);
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
@@ -263,6 +255,7 @@ main {
     margin-top: 40%;
     height: min-content;
     margin-right: 20px;
+    z-index: 999;
 }
 .cartbg
 {

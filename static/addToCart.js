@@ -5,7 +5,7 @@ function addToCart(item_name, price,image_url, count) {
     
     $.ajax({
         type: 'POST',  // Assuming you're making a POST request
-        url: '/cart',  // Replace with your actual endpoint
+        url: '/add_to_cart',  // Replace with your actual endpoint
         data: {
             'item_name': item_name,
             'price': price,
