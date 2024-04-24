@@ -1,39 +1,94 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Food Cart</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    </head>
-<body
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Cart</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='grained.js') }}"></script>
+    <style>
+        .grainbackground {
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
     <header>
         <div class="title">
-            <h1>Food Cart</h1>
-            <button class="cartbtn" onclick="window.location.href='/'">Go Back</button>
+            <button class="cartbtn" onclick="window.location.href='/';">Go Back</button>
         </div>
     </header>
-    {% if foodcart|length == 0 %}
-        <div class="cart">
-            <h2>Your cart is empty</h2>
-            <p>Go back to the main page to add items to your cart</p>
-    {% else %}
-        <div class="cart">
-            {% for item in foodcart %}
-            <div class="item-container">
-                <h2 class="item-name">{{ item.item_name }}</h2>
-                <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
-                <div class="item-cardbottom">
-                    <p class="item-price">Price: {{ item.price }}</p>
-                    <p class="item-count">Count: {{ item.count }}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="total-cost">
-            <h2>The Total Cost Of This Cart is ${{ total_cost }}</h2>
-        </div>
-    {% endif %}
+    <main>
+        <div id="grainbackground" class="grainbackground">
+            <div class="subheader">
+                <h2>Food Cart</h2>
+                <p>&copy; 2024 Frugal Dash. All rights reserved. <s>honestly don't think this is legally binding</s></p>
 
+            </div>
+            {% if foodcart|length == 0 %}
+                <div class="cart">
+                    <h2>Your cart is empty</h2>
+                    <p>Go back to the main page to add items to your cart</p>
+                </div>
+            {% else %}
+        <div class ="subsubheader">  
+                <div class="total-cost">
+                    <h2>The Total Cost Of This Cart is ${{ total_cost }}</h2>
+                </div>
+                <!-- Add a form for entering the number of days -->
+                <form id="days-form">
+                    <label for="days">How many days' worth of food is in this grocery list?</label>
+                    <input type="number" id="days" name="days" min="1" required>
+                </form>
+            
+                <!-- Display the estimated monthly grocery list -->
+                <div id="monthly-estimate"></div>
+            
+                <script>
+                    function calculate_monthly_estimate(days) {
+                        // Get the current total cost
+                        var current_total_cost = parseFloat($('.total-cost h2').text().replace('The Total Cost Of This Cart is $', ''));
+                        
+                        // Calculate the estimated monthly grocery list
+                        var monthly_estimate = current_total_cost * (30 / days);
+                        
+                        return monthly_estimate;
+                    }
+                    
+                    $(document).ready(function() {
+                        $('#days-form').on('submit', function(event) {
+                            event.preventDefault();
+                            
+                            var days = $('#days').val();
+                            
+                            // Calculate the estimated monthly grocery list
+                            var monthly_estimate = calculate_monthly_estimate(days);
+                            
+                            // Update the page with the estimated monthly grocery list
+                            $('#monthly-estimate').text('An estimated monthly grocery list based on this list would be: $' + monthly_estimate.toFixed(2));
+                        });
+                    });
+                </script>
+            </div>
+                <div class="cart">
+                    {% for item in foodcart %}
+                        <div class="item-container">
+                            <h2 class="item-name">{{ item.item_name }}</h2>
+                            <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
+                            <div class="item-cardbottom">
+                                <p class="item-price">Price: {{ item.price }}</p>
+                                <p class="item-count">Count: {{ item.count }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </main>
 </body>
 </html>

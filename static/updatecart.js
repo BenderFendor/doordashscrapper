@@ -18,6 +18,20 @@ function updateCart() {
                 );
                 $cart.append($row);
             });
+
+            function updateTotalCost() {
+                $.ajax({ 
+                    url: '/get_total_cost',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#total-cost').text("The Total Cost Of This Cart is $" + data.total_cost);
+                        console.log('Total cost:', data.total_cost);
+                    }
+                });
+            }
+            
+            updateTotalCost();
+            hideShowCart();
         }
     });
 }

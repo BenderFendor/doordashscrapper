@@ -12,9 +12,11 @@ driver = uc.Chrome(enable_cdp_events=True, use_subprocess=True)
 driver.implicitly_wait(30)
 driver.maximize_window()
 
-driver.get("https://www.doordash.com/convenience/store/24666582/search/*/?attr_src=search&disable_spell_check=false")
+driver.get("https://www.doordash.com/convenience/store/1748872/search/*/?attr_src=home&disable_spell_check=false")
 
 find = driver.find_element(By.XPATH, '//*[@id="__NEXT_DATA__"]')
+
+# Doesn't Scrape all items
 
 # Dumb workaround to get it to work inside childern folders
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -31,3 +33,4 @@ else:
     print("Element is disabled")
 
 driver.quit()
+

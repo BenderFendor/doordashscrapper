@@ -13,6 +13,7 @@
     <script src="{{ url_for('static', filename='updatecart.js') }}""></script>
     <script src="{{ url_for('static', filename='addToCart.js') }}""></script>
     <script src="{{ url_for('static', filename='clearcart.js') }}""></script>
+    <script src="{{ url_for('static', filename='hidecart.js') }}""></script>
     <script src="{{ url_for('static', filename='grained.js') }}""></script>
 </head>
 <body>
@@ -55,8 +56,8 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="showcarttotal"
-                        <p class="carttotal">The Total Cost Of This Cart is ${{ total_cost }}</p>
+                    <div class="showcarttotal">
+                        <p id="total-cost">The Total Cost Of This Cart is ${{ total_cost }}</p>
                         <button class="clearcart" onclick="clearCart()">Clear Cart</button>
                     </div>
             </div>
@@ -80,7 +81,7 @@
                             <input type="hidden" name="price" value="{{ item.price }}">
                             <input type="hidden" name="image_url" value="{{ item.image_url }}"> <!-- Make sure you have this line -->     
                             <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
-                            <input type="button" class = "addtocart" value="Add to cart" onclick="addToCart('{{ item.item_name }}', '{{ item.price }}','{{ item.url }}',document.getElementById('count_{{ item.item_name }}').value)">
+                            <input type="button" class = "addtocart" value="Add to cart" onclick="addToCart('{{ item.item_name }}', '{{ item.price }}','{{ item.image_url }}',document.getElementById('count_{{ item.item_name }}').value)">
                             <input type="hidden" name="item_name" value="{{ item.item_name }}">
                         </form>
                     </div>
@@ -89,52 +90,75 @@
             </div>
         </div>
         <script>
-            document.getElementById('searchForm').addEventListener('submit', function(event) {
-                event.preventDefault();  // Prevent the form from being submitted normally
+            // Debounce function
+            function debounce(func, delay) {
+                let timer;
+                return function() {
+                    clearTimeout(timer);
+                    timer = setTimeout(func, delay);
+                };
+            }
+        
+            // Function to handle search
+            function handleSearch() {
+                if (event) event.preventDefault();  // Prevent the form from being submitted normally
 
-                var searchQuery = document.getElementById('search').value;  // Get the search query
+                var searchQuery = $('#search').val();  // Get the search query
 
-                console.log('Search query:', searchQuery)
+                // Hide all items before the AJAX request
+                $('.allitems > div').addClass('hidden');
+
+                if (searchQuery === '') {
+                    // If the search query is empty, show all items
+                    $('.allitems > div').removeClass('hidden');
+                    $('#no-items-found').hide();
+                    return;
+                }
+
+        
+                console.log('Search query:', searchQuery);
                 console.log('Full URL with encoded search query:', 'http://localhost:5000/search?search=' + encodeURIComponent(searchQuery));
+        
                 // Send an AJAX request to the server
-                fetch('/search?search=' + encodeURIComponent(searchQuery), {
+                $.ajax({
+                    url: '/search?search=' + encodeURIComponent(searchQuery),
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Data:', data);
-                    // Get all items
-                    let allItems = document.querySelectorAll('.allitems > div');
+                    contentType: 'application/json',
+                    success: function(data) {
+                        // Get all items
+                        let allItems = $('.allitems > div');
+        
+                        // Loop through each item
+                        allItems.each(function() {
+                            // Get the item name from the h2.itemname element's text content
+                            let itemName = $(this).find('.itemname').text();
 
-                    // Convert the NodeList to an array and loop through each item
-                    Array.from(allItems).forEach(item => {
-                        // Show all items to reset search
-                        item.style.display = 'block';
-                        // Get the item name from the h2.itemname element's text content
-                        let itemName = item.querySelector('.itemname').textContent;
+                            // Check if the item is in the data
+                            let itemInData = data.some(dataItem => dataItem.item_name === itemName);
 
-                        // Check if the item is in the data
-                        let itemInData = data.some(dataItem => dataItem.item_name === itemName);
-
-                        // If the item is not in the data, hide it
-                        if (!itemInData) {
-                            item.style.display = 'none';
-                        }
-                        
+                            // If the item is in the data, show it
+                            if (itemInData) {
+                                $(this).removeClass('hidden');
+                            }
+                        });
                         // If no items were found, show a message
                         if (data.length === 0) {
-                            document.getElementById('no-items-found').style.display = 'block';
-                            document.getElementById('no-items-found').textContent = 'No items found that matched with the search query ' + searchQuery;
+                            $('#no-items-found').show().text('No items found that matched with the search query ' + searchQuery);
+                        } else {
+                            $('#no-items-found').hide();
                         }
-                    });
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
+                    },
+                    error: function(error) {
+                        console.error('Error:', error);
+                    }
                 });
-            });
+            }
+        
+            // Debounce the keyup event
+            $('#searchForm').keyup(debounce(handleSearch, 300));
+
+            // Handle the submit event
+            $('#searchForm').on('submit', handleSearch);
         </script>
         
         <!-- Todo add the feature that you can remove each item from the cart by adding a remove button next to each item in the cart. -->
@@ -154,7 +178,8 @@
                 "grainHeight": 1
                 }
                 grained("#grainbackground", options);
-
+                hideShowCart();
+                updateTotalCost();
                 /*
                 background-color :rgb(41, 46, 49)
                 */

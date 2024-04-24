@@ -29,7 +29,7 @@ def showData():
     for item in data_list:
         item['image_url'] = ','.join([item['image_url'], item['image_urlpart2'], item['image_urlpart3'], item
         ['image_urlpart4']])
-        item['count'] = 1
+        item['count'] = 1 
 
     # Store data_list in the session
     session['foodlist'] = data_list
@@ -42,10 +42,10 @@ def showData():
         first_item = data_list[0]
         print(f"First item: Name={first_item['item_name']}, Price={first_item['price']}, Cost={first_item['image_url']}")
 
-    # Get cart data from the session
+    # Get cart data from the session/[]
     foodcart = session.get('cart', [])
     
-    total_cost = sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None)
+    total_cost = round(sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None), 2)
 
     return render_template('show_csv_data.html', data=data_list,foodcart=foodcart,total_cost = total_cost)
 
@@ -164,10 +164,15 @@ def updatecart():
 @app.route('/show_cart')
 def show_cart():
     foodcart = session.get('cart', [])
+        
+    print(foodcart)
+
     if not foodcart:
         return render_template('cart.html', foodcart=foodcart, total_cost=0,is_empty=True)
     
-    total_cost = sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None)
+    # this doesn't dyanmically reload the totalcost idk how to do to that
+
+    total_cost = round(sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None), 2)
     return render_template('cart.html', foodcart=foodcart, total_cost=total_cost)
 
 @app.route('/search', methods=['GET'])
@@ -181,6 +186,12 @@ def search():
     matched_items = [item for item in data_list if fuzzy_match(search_query, item['item_name'])]
 
     return jsonify(matched_items)  # Return the search results as JSON
+
+@app.route('/get_total_cost')
+def get_total_cost():
+    foodcart = session.get('cart', [])
+    total_cost = round(sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None), 2)
+    return jsonify({'total_cost': total_cost})
 
 if __name__ == '__main__':
     app.run(debug=True)
