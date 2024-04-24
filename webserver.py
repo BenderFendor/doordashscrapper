@@ -16,7 +16,7 @@ def clear_session():
 def showData():
     session['foodlist'] = []
     # read csv
-    data_file_path = 'testdoordashoutput.csv'
+    data_file_path = 'doordashoutput.csv'
     global data_list
     data_list = []
     with open(data_file_path, mode='r', encoding='latin1') as file:
