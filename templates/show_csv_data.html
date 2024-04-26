@@ -89,75 +89,67 @@
             </div>
         </div>
         <script>
-            // Debounce function
-            function debounce(func, delay) {
-                let timer;
-                return function() {
-                    clearTimeout(timer);
-                    timer = setTimeout(func, delay);
-                };
-            }
-        
-            // Function to handle search
-            function handleSearch() {
-                if (event) event.preventDefault();  // Prevent the form from being submitted normally
+            const searchForm = document.getElementById('searchForm');
+            const allItemsDiv = document.querySelector('.allitems');
+            let page = 1;
 
-                var searchQuery = $('#search').val();  // Get the search query
-
-                // Hide all items before the AJAX request
-                $('.allitems > div').addClass('hidden');
-
-                if (searchQuery === '') {
-                    // If the search query is empty, show all items
-                    $('.allitems > div').removeClass('hidden');
-                    $('#no-items-found').hide();
-                    return;
-                }
-
-        
-                console.log('Search query:', searchQuery);
-                console.log('Full URL with encoded search query:', 'http://localhost:5000/search?search=' + encodeURIComponent(searchQuery));
-        
-                // Send an AJAX request to the server
-                $.ajax({
-                    url: '/search?search=' + encodeURIComponent(searchQuery),
-                    method: 'GET',
-                    contentType: 'application/json',
-                    success: function(data) {
-                        // Get all items
-                        let allItems = $('.allitems > div');
-        
-                        // Loop through each item
-                        allItems.each(function() {
-                            // Get the item name from the h2.itemname element's text content
-                            let itemName = $(this).find('.itemname').text();
-
-                            // Check if the item is in the data
-                            let itemInData = data.some(dataItem => dataItem.item_name === itemName);
-
-                            // If the item is in the data, show it
-                            if (itemInData) {
-                                $(this).removeClass('hidden');
-                            }
+            searchForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const searchInput = document.getElementById('search').value;
+                fetch(`/search?query=${searchInput}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        allItemsDiv.innerHTML = '';
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.innerHTML = `
+                                <h2 class="itemname">${item.item_name}</h2>
+                                <img src="${item.image_url}" alt="${item.item_name}">
+                                <p class="itemprice">Price: ${item.price}</p>
+                                <form class="add-to-cart-form">
+                                    <input type="hidden" name="item_name" value="${item.item_name}">
+                                    <input type="hidden" name="price" value="${item.price}">
+                                    <input type="hidden" name="image_url" value="${item.image_url}">
+                                    <input type="number" name="count" id="count_${item.item_name}" min="1" value="${item.count}">
+                                    <input type="button" class="addtocart" value="Add to cart" onclick="addToCart('${item.item_name}', '${item.price}', '${item.image_url}', document.getElementById('count_${item.item_name}').value)">
+                                </form>
+                            `;
+                            allItemsDiv.appendChild(div);
                         });
-                        // If no items were found, show a message
-                        if (data.length === 0) {
-                            $('#no-items-found').show().text('No items found that matched with the name ' + searchQuery);
-                        } else {
-                            $('#no-items-found').hide();
-                        }
-                    },
-                    error: function(error) {
-                        console.error('Error:', error);
-                    }
-                });
-            }
-            
-            // Debounce the keyup event
-            $('#searchForm').keyup(debounce(handleSearch, 300));
+                    })
+                    .catch(e => {
+                        console.error('An error occurred while searching:', e);
+                    });
+            });
 
-            // Handle the submit event
-            $('#searchForm').on('submit', handleSearch);
+            allItemsDiv.addEventListener('scroll', function() {
+                if ((allItemsDiv.scrollTop + allItemsDiv.clientHeight) >= allItemsDiv.scrollHeight) {
+                    // User has scrolled to the bottom of the div, fetch the next set of data
+                    fetch(`/data?page=${++page}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(item => {
+                                const div = document.createElement('div');
+                                div.innerHTML = `
+                                    <h2 class="itemname">${item.item_name}</h2>
+                                    <img src="${item.image_url}" alt="${item.item_name}">
+                                    <p class="itemprice">Price: ${item.price}</p>
+                                    <form class="add-to-cart-form">
+                                        <input type="hidden" name="item_name" value="${item.item_name}">
+                                        <input type="hidden" name="price" value="${item.price}">
+                                        <input type="hidden" name="image_url" value="${item.image_url}">
+                                        <input type="number" name="count" id="count_${item.item_name}" min="1" value="${item.count}">
+                                        <input type="button" class="addtocart" value="Add to cart" onclick="addToCart('${item.item_name}', '${item.price}', '${item.image_url}', document.getElementById('count_${item.item_name}').value)">
+                                    </form>
+                                `;
+                                allItemsDiv.appendChild(div);
+                            });
+                        })
+                        .catch(e => {
+                            console.error('An error occurred while fetching the data:', e);
+                        });
+                }
+            });
         </script>
         
         <!-- Todo add the feature that you can remove each item from the cart by adding a remove button next to each item in the cart. -->
@@ -168,20 +160,22 @@
         <script>
             window.onload = function() {
                 var options = {
-                "animate": false,
-                "patternWidth": 388.24,
-                "patternHeight": 382.84,
-                "grainOpacity": 0.1,
-                "grainDensity": 1,
-                "grainWidth": 1,
-                "grainHeight": 1
+                    "animate": false,
+                    "patternWidth": 388.24,
+                    "patternHeight": 382.84,
+                    "grainOpacity": 0.1,
+                    "grainDensity": 1,
+                    "grainWidth": 1,
+                    "grainHeight": 1
                 }
-                grained("#grainbackground", options);
+
+                // Use setTimeout or requestAnimationFrame
+                requestAnimationFrame(() => {
+                    grained("#grainbackground", options);
+                });
+
                 hideShowCart();
                 updateTotalCost();
-                /*
-                background-color :rgb(41, 46, 49)
-                */
             };
         </script>
         </body>

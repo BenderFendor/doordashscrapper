@@ -1,53 +1,146 @@
-from flask import Flask, flash, jsonify, render_template, request, redirect, url_for, session
+import re
+import redis
+from flask import Flask, flash, json, jsonify, render_template, request, redirect, url_for, session
 from fuzzywuzzy import fuzz
 import csv
+
+from redisearch import Client, TextField, NumericField, Document
+
+r = redis.Redis(host='localhost', port=6379, db=0)
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # replace with your secret key
 
-data_list = []
+# Create a client for the 'items' index
+client = Client('items')
+
+# Drop the 'items' index if it exists
+try:
+    client.info()
+    client.drop_index()
+except redis.exceptions.ResponseError as e:
+    if str(e) != "Unknown Index name":
+        print("Index 'items' does not exist, skipping drop_index.")
+    else:
+        raise  # re-raise the exception if it's something other than "Unknown Index name"
+
+# Create the 'items' index
+client.create_index([TextField('item_name'), TextField('price'), TextField('image_url')])
+
+def indexdata():
+    data_file_path = 'ACME (2101 Cottman Avenue), Delivered by DoorDash.csv'
+
+    # Load only a subset of the data
+    data_list = []
+
+    with open(data_file_path, mode='r', encoding='latin1') as file:
+        reader = csv.reader(file)
+        headers = next(reader)
+
+        # Check if the index exists
+        try:
+            client.info()  # This will raise an exception if the index doesn't exist
+        except redis.exceptions.ResponseError:
+            # Index doesn't exist, create a new one
+            client.create_index([TextField('item_name'), TextField('price'), TextField('image_url')])
+        else:
+            # Index exists, you can choose to drop it or skip the creation step
+            print("Index 'items' already exists.")
+            # client.drop_index()  # Uncomment this line if you want to drop the existing index
+
+        for i, values in enumerate(reader):
+            item = dict(zip(headers, values))
+            data_list.append(item)
+
+        for item in data_list:
+            keys = ['image_url', 'image_urlpart2', 'image_urlpart3', 'image_urlpart4']
+            if all(key in item for key in keys):
+                item['image_url'] = ','.join([item[key] for key in keys])
+            item['count'] = 1
+
+            # Create a new Redisearch document for each item
+            doc_id = item['item_name']
+            doc_fields = {
+                'item_name': item.get('item_name', 'N/A'),
+                'price': item.get('price', 'N/A'),  # use 'N/A' if 'price' key does not exist
+                'image_url': item.get('image_url', 'N/A')
+            }
+            try:
+                client.add_document(doc_id, replace=True, **doc_fields)
+            except ReferenceError as e:
+                if "Document already exists" in str(e):
+                    print(f"Document with ID {doc_id} already exists, skipping.")
+                else:
+                    raise
 
 @app.route('/clear_session')
 def clear_session():
     session.clear()
     return "Session cleared"
 
-@app.route('/')
-def showData():
-    session['foodlist'] = []
-    # read csv
-    data_file_path = 'doordashoutput.csv'
-    global data_list
+@app.route('/', defaults={'json_output': False})
+@app.route('/data', defaults={'json_output': True}, methods=['GET'])
+def showData(json_output):
+    data_file_path = 'ACME (2101 Cottman Avenue), Delivered by DoorDash.csv'
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Change this as needed
+    offset = (page - 1) * per_page
+
+    # Load only a subset of the data
     data_list = []
+    
     with open(data_file_path, mode='r', encoding='latin1') as file:
         reader = csv.reader(file)
         headers = next(reader)
-        for values in reader:
+        for i, values in enumerate(reader):
+            if i < offset:
+                continue
+            if i >= offset + per_page:
+                break
             item = dict(zip(headers, values))
             data_list.append(item)
-    
-    for item in data_list:
-        item['image_url'] = ','.join([item['image_url'], item['image_urlpart2'], item['image_urlpart3'], item
-        ['image_urlpart4']])
-        item['count'] = 1 
 
-    # Store data_list in the session
-    session['foodlist'] = data_list
-    if session.get('foodlist') is None:
-        print("Session is empty")
+        for item in data_list:
+            keys = ['image_url', 'image_urlpart2', 'image_urlpart3', 'image_urlpart4']
+            if all(key in item for key in keys):
+                item['image_url'] = ','.join([item[key] for key in keys])
+            else:
+                continue
+            item['count'] = 1
+            
+    if json_output:
+        return jsonify(data_list)
     else:
-        print("Session is not empty")
+        page = request.args.get('page', 1, type=int)
+        per_page = 10  # Change this as needed
+        offset = (page - 1) * per_page
 
-    if data_list:
-        first_item = data_list[0]
-        print(f"First item: Name={first_item['item_name']}, Price={first_item['price']}, Cost={first_item['image_url']}")
+        # Load only a subset of the data
+        data_list = []
+        with open(data_file_path, mode='r', encoding='latin1') as file:
+            reader = csv.reader(file)
+            headers = next(reader)
+            for i, values in enumerate(reader):
+                if i < offset:
+                    continue
+                if i >= offset + per_page:
+                    break
+                item = dict(zip(headers, values))
+                data_list.append(item)
 
-    # Get cart data from the session/[]
-    foodcart = session.get('cart', [])
+       # Store the foodlist in Redis
+        r.set('foodlist', json.dumps(data_list))
+
+        # Get the cart from Redis
+        foodcart = r.get('cart')
+        if foodcart is None:
+            foodcart = []
+        else:
+            foodcart = json.loads(foodcart)
+
+        total_cost = round(sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None), 2)
     
-    total_cost = round(sum(float(item['price'].replace('$', '')) * int(item['count']) if item['count'] not in [None, ''] else 0 for item in foodcart if item['price'] is not None), 2)
-
-    return render_template('show_csv_data.html', data=data_list,foodcart=foodcart,total_cost = total_cost)
+        return render_template('show_csv_data.html', data=data_list, foodcart=foodcart, total_cost=total_cost)
 
 # Define a function to perform fuzzy matching
 def fuzzy_match(keyword, item_name):
@@ -109,10 +202,12 @@ def add_to_cart():
         'count': count
     }
 
-    print(f"Added item to cart: Name={item_name}, Price={price}, Count={count}")
-    
-    # Get the existing cart from the session
-    foodcart = session.get('cart', [])
+    # Get the existing cart from Redis
+    foodcart = r.get('cart')
+    if foodcart is None:
+        foodcart = []
+    else:
+        foodcart = json.loads(foodcart)
 
     # Check if the item is already in the cart
     for item in foodcart:
@@ -121,16 +216,12 @@ def add_to_cart():
             item['count'] = count
             break
     else:
-        # If the item is not in the cart, add it
         foodcart.append(cart)
-        
-    session['cart'] = foodcart
 
-    # Print the updated cart
-    print("Updated cart:", session.get('cart', []))
+    # Store the updated cart in Redis
+    r.set('cart', json.dumps(foodcart))
 
-    # Redirect to the page that shows the cart
-    return jsonify({'cart': foodcart})
+    return redirect(url_for('showData'))
 
 def updatecart():
     item_name = request.form.get('item_name')
@@ -177,13 +268,23 @@ def show_cart():
 
 @app.route('/search', methods=['GET'])
 def search():
-    global data_list
-    search_query = request.args.get('search', '')  # Get the search query from the URL parameters
+    search_query = request.args.get('query', '')
+    print(f"Search query: {search_query}")  # Log the search query
+    
+    # Sanitize the search query
+    search_query = re.sub(r'\W+', '', search_query)
+    print(f"Sanitized search query: {search_query}")  # Log the sanitized search query
 
-    print(data_list)
+    # Get information about the RediSearch index
+    index_info = client.info()
+    print(f"Index info: {index_info}")  # Log the index info
 
-    # Use the fuzzy_match function to filter the data_list
-    matched_items = [item for item in data_list if fuzzy_match(search_query, item['item_name'])]
+    # Use the RediSearch client to search the 'items' index
+    results = client.search(f"{search_query}")  # Perform a prefix search
+    # Convert the results to a list of dictionaries
+    matched_items = [{field: getattr(doc, field) for field in doc.__dict__.keys()} for doc in results.docs]
+
+    print(f"Search results: {matched_items}")  # Log the search results
 
     return jsonify(matched_items)  # Return the search results as JSON
 
@@ -194,4 +295,5 @@ def get_total_cost():
     return jsonify({'total_cost': total_cost})
 
 if __name__ == '__main__':
+    indexdata()
     app.run(debug=True)

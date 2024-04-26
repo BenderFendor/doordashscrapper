@@ -1,5 +1,6 @@
 # Ignore all .csv files
 *.csv
+*.json
 
 # Ignore all files in the log directory
 __pycache__/*
