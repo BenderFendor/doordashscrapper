@@ -26,7 +26,6 @@
     <main>
         <div id="grainbackground" class="grainbackground">
             <div class="subheader">
-                <img class="headerimg" src="{{ url_for('static', filename='headerimg.jpg') }}" alt="Grocery Store">
                 <h2>Welcome to Frugal Dash</h2>
                 <p>This program calculates the cost of your groceries based on stored information from various stores, such as Aidi or any other store of your choice. It provides an estimate of your grocery expenses for a specific duration, whether it's a week, a month, or a year. This program calculates the cost of your groceries based on stored information from various stores, such as Aidi or any other store of your choice. It provides an estimate of your grocery expenses for a specific duration, whether it's a week, a month, or a year.</p>
             </div>
@@ -85,8 +84,8 @@
                             <input type="hidden" name="item_name" value="{{ item.item_name }}">
                         </form>
                     </div>
-                {% endfor %}
-                </div>
+                {% endfor %}  
+               </div>
             </div>
         </div>
         <script>
@@ -143,7 +142,7 @@
                         });
                         // If no items were found, show a message
                         if (data.length === 0) {
-                            $('#no-items-found').show().text('No items found that matched with the search query ' + searchQuery);
+                            $('#no-items-found').show().text('No items found that matched with the name ' + searchQuery);
                         } else {
                             $('#no-items-found').hide();
                         }
@@ -153,7 +152,7 @@
                     }
                 });
             }
-        
+            
             // Debounce the keyup event
             $('#searchForm').keyup(debounce(handleSearch, 300));
 
