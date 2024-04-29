@@ -1,18 +1,22 @@
 import re
 import redis
 from flask import Flask, flash, json, jsonify, render_template, request, redirect, url_for, session
-from fuzzywuzzy import fuzz
+from thefuzz import fuzz,process
 import csv
 import os
+import numpy as np
 
-from redisearch import Client, TextField, NumericField, Document
+from redisearch import Client, TextField, NumericField, Document,Query
+from redis import Redis, ResponseError
+
 
 def create_app():
+
     app = Flask(__name__)
     app.secret_key = 'your_secret_key'  # replace with your secret key
 
     r = redis.Redis(host='localhost', port=6379, db=0)
-
+    
     # Create a client for the 'items' index
     client = Client('items')
 
@@ -27,7 +31,7 @@ def create_app():
             raise  # re-raise the exception if it's something other than "Unknown Index name"
 
     # Create the 'items' index
-    client.create_index([TextField('item_name'), TextField('price'), TextField('image_url')])
+    client.create_index([TextField('item_name'), TextField('price'), TextField('image_url'), TextField('store'), NumericField('count')])
 
     def get_csv_files():
         csv_files = [f for f in os.listdir() if f.endswith(".csv")]
@@ -74,18 +78,21 @@ def create_app():
             client.info()  # This will raise an exception if the index doesn't exist
         except redis.exceptions.ResponseError:
             # Index doesn't exist, create a new one
-            client.create_index([TextField('item_name'), TextField('price'), TextField('image_url')])
+            client.create_index([TextField('item_name'), TextField('price'), TextField('image_url'), TextField('store'), NumericField('count')])
         else:
             # Index exists, you can choose to drop it or skip the creation step
             print("Index 'items' already exists.")
-            # client.drop_index()  # Uncomment this line if you want to drop the existing index
+            client.drop_index()  # Uncomment this line if you want to drop the existing index
+            client.create_index([TextField('item_name'), TextField('price'), TextField('image_url'), TextField('store'), NumericField('count')])
 
         for item in data_list:
             doc_id = item['item_name']
             doc_fields = {
                 'item_name': item.get('item_name', 'N/A'),
                 'price': item.get('price', 'N/A'),  # use 'N/A' if 'price' key does not exist
-                'image_url': item.get('image_url', 'N/A')
+                'image_url': item.get('image_url', 'N/A'),
+                'store': item.get('store', 'N/A'),
+                'count': item.get('count', 1)  # use 1 if 'count' key does not exist
             }
             try:
                 client.add_document(doc_id, replace=True, **doc_fields)
@@ -178,9 +185,11 @@ def create_app():
             'item_name': request.form.get('item_name'),
             'price': request.form.get('price'),
             'image_url': request.form.get('image_url'),
-            'count': int(request.form.get('count')),  # Make sure to convert 'count' to an integer
+            'count': request.form.get('count'),  # Make sure to convert 'count' to an integer
             'store': request.form.get('store')
         }
+
+        
 
         foodcart = get_cart_from_redis()
 
@@ -242,21 +251,31 @@ def create_app():
         current_cart = get_cart_from_redis()
         print(f"Current cart: {current_cart}")
 
-        # Convert the current cart to a dictionary for faster lookups
-        current_cart_dict = {(item['item_name'], item['store']): item for item in current_cart}
+        # Convert the current cart to a set of tuples for efficient lookup
+        current_cart_set = set((item['item_name'], item['store']) for item in current_cart)
 
-        # Calculate the similarity score for each item in the current cart and each item in the other carts
+        # Calculate the similarity score for each unique item in the current cart
         similarity_scores = []
 
         for csvfile in get_csv_files():
+            if csvfile == session.get('current_csv'):
+                print(f"Skipping current CSV file: {csvfile}")
+                continue
+
             other_cart = read_csv(csvfile)
+            print(f"Other cart: {other_cart}")
 
             for other_item in other_cart:
                 other_item_key = (other_item['item_name'], other_item['store'])
-                if other_item_key in current_cart_dict:
-                    current_item = current_cart_dict[other_item_key]
-                    similarity_score = calculate_item_similarity(current_item, other_item)
-                    similarity_scores.append((current_item, other_item, similarity_score))
+                for current_item_key in current_cart_set:
+                    similarity_score = fuzz.partial_token_sort_ratio(other_item_key, current_item_key)
+                    if similarity_score > 75:  # adjust the threshold as needed
+                        # Find the current_item that matches current_item_key
+                        current_item = next((item for item in current_cart if (item['item_name'], item['store']) == current_item_key), None)
+                        if current_item is not None:
+                            similarity_score = process.extractOne(current_item['item_name'], [other_item['item_name']], scorer=fuzz.partial_token_sort_ratio)[1]
+                            if similarity_score is not None:  # Only append if the score is not None
+                                similarity_scores.append((current_item, other_item, similarity_score))
 
         print(f"Similarity scores: {similarity_scores}")
 
@@ -264,13 +283,6 @@ def create_app():
         similarity_scores.sort(key=lambda x: x[2], reverse=True)
 
         return jsonify({'similarity_scores': similarity_scores})
-
-    def calculate_item_similarity(item1, item2):
-        # Calculate the similarity score between two items
-        # You can use any similarity metric you prefer, such as fuzzy matching or cosine similarity
-        # Here's an example using fuzzy matching from the fuzzywuzzy library
-        similarity_score = fuzz.partial_ratio(json.dumps(item1), json.dumps(item2))
-        return similarity_score
 
     index_data()
 
