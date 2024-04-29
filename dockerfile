@@ -1,5 +1,16 @@
+GNU nano 4.8                                     dockerfile                                                
 # Use an official Python runtime as a parent image
 FROM python:3.8-slim-buster
+
+# Update package lists
+RUN apt-get update
+
+# Install wget
+RUN apt-get install -y wget
+
+# Download and install Chrome
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
 
 # Set the working directory in the container to /app
 WORKDIR /app
@@ -14,4 +25,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # Run webserver.py when the container launches
-CMD ["python", "webserver.py"]
+CMD ["python", "doordashscraper.py"]
+
+
+
+
+
+
+
+
+
