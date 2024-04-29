@@ -31,7 +31,7 @@
 
             </div>
             {% if foodcart|length == 0 %}
-                <div class="cart">
+                <div class="cart" id="current-cart">
                     <h2>Your cart is empty</h2>
                     <p>Go back to the main page to add items to your cart</p>
                 </div>
@@ -47,11 +47,46 @@
                 </form>
                 <!-- Add a compare dropdown -->
                 <div class="compare-dropdown">
-                    <button class="compare-dropdown-button">Compare with similar carts</button>
+                    <button class="cartbtn" id="compare-button">Compare with similar carts</button>
                 </div>
                 <!-- Display the estimated monthly grocery list -->
                 <div id="monthly-estimate"></div>
-            
+                
+                <div id="compared-cart"></div>
+                <script>
+                    $('#compare-button').click(function() {
+                        $.ajax({
+                            url: '/compare_carts',
+                            type: 'GET',
+                            success: function(data) {
+                                var similarity_scores = data.similarity_scores;
+                                var compared_cart_html = '';
+                                for (var i = 0; i < similarity_scores.length; i++) {
+                                    var current_item = similarity_scores[i][0];
+                                    var other_item = similarity_scores[i][1];
+                                    var similarity_score = similarity_scores[i][2];
+                                    compared_cart_html += '<div class="compared-item-row">';
+                                    compared_cart_html += '<div class="compared-item original-item">';
+                                    compared_cart_html += '<img src="' + current_item.image_url + '" alt="' + current_item.item_name + '">';
+                                    compared_cart_html += '<p>' + current_item.item_name + ' - $' + current_item.price + '</p>';
+                                    compared_cart_html += '</div>';
+                                    if (other_item !== null) {
+                                        compared_cart_html += '<div class="compared-item">';
+                                        compared_cart_html += '<img src="' + other_item.image_url + '" alt="' + other_item.item_name + '">';
+                                        compared_cart_html += '<p>' + other_item.item_name + ' - $' + other_item.price + '</p>';
+                                        compared_cart_html += '<p>Similarity Score: ' + similarity_score + '</p>';
+                                        compared_cart_html += '</div>';
+                                    }
+                                    compared_cart_html += '</div>';
+                                }
+                                $('#compared-cart').html(compared_cart_html);
+                                $('#current-cart').hide();
+                                $('#compared-cart').show();
+                            }
+                        });
+                    });
+                </script>
+                </script>
                 <script>
                         $.ajax({
                         url: '/get_total_cost',

@@ -265,18 +265,21 @@ def create_app():
             other_cart = read_csv(csvfile)
             print(f"Other cart: {other_cart}")
 
+            matched_items = set()
             for other_item in other_cart:
                 other_item_key = (other_item['item_name'], other_item['store'])
                 for current_item_key in current_cart_set:
-                    similarity_score = fuzz.partial_token_sort_ratio(other_item_key, current_item_key)
-                    if similarity_score > 75:  # adjust the threshold as needed
-                        # Find the current_item that matches current_item_key
-                        current_item = next((item for item in current_cart if (item['item_name'], item['store']) == current_item_key), None)
-                        if current_item is not None:
-                            similarity_score = process.extractOne(current_item['item_name'], [other_item['item_name']], scorer=fuzz.partial_token_sort_ratio)[1]
-                            if similarity_score is not None:  # Only append if the score is not None
-                                similarity_scores.append((current_item, other_item, similarity_score))
-
+                    if current_item_key not in matched_items:
+                        similarity_score = fuzz.partial_token_sort_ratio(other_item_key, current_item_key)
+                        if similarity_score > 75:  # adjust the threshold as needed
+                            # Find the current_item that matches current_item_key
+                            current_item = next((item for item in current_cart if (item['item_name'], item['store']) == current_item_key), None)
+                            if current_item is not None:
+                                similarity_score = process.extractOne(current_item['item_name'], [other_item['item_name']], scorer=fuzz.partial_token_sort_ratio)[1]
+                                if similarity_score is not None:  # Only append if the score is not None
+                                    similarity_scores.append((current_item, other_item, similarity_score))
+                                    matched_items.add(current_item_key)  # Add the current_item_key to the matched_items set
+            
         print(f"Similarity scores: {similarity_scores}")
 
         # Sort the similarity scores in descending order

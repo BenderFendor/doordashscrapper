@@ -446,8 +446,78 @@ main {
     border: none;
     box-shadow: 0 4px 14px 0 rgba(175, 238, 162, 0.39);
 }
+#compared-cart {
+    display: none;
+}
 
+.compared-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 20px;
+    width: 50%;
+    margin: 0 auto;
+    background-color: var(--bgcolortrans);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--bgcolor) 0px 5px 5px -5px;
+    border-radius: 10px;
+    gap: 20px; /* Add this line to create a gap between items */
+}
+.compared-item-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.compared-item {
+    margin: 0 10px;
+    text-align: center;
+}
+
+.compared-item img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+.compared-item-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.compared-item {
+    background-color: rgba(255, 0, 0, 0.2); /* Red background for compared item */
+}
+
+.original-item {
+    background-color: rgba(0, 128, 0, 0.2); /* Green background for original item */
+}
+
+.compared-item p {
+    margin-top: 10px;
+}
 .addtocart:hover {
     background-color: var(--accentbg);
     box-shadow: 0 6px 20px rgba(24, 214, 81, 0.23);
+}
+
+.store-dropdown {
+    font-family: 'Inter', sans-serif;
+    font-weight: bold;
+    padding: 15px;
+    font-size: 15px;
+    border-radius: 5px;
+    border: none;
+    width: auto;
+    background-color: var(--accentcolor);
+    color: var(--textcolor);
+    box-shadow: 0 4px 14px 0 rgba(175, 238, 162, 0.39);
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.store-dropdown:hover {
+    box-shadow: 0 6px 20px rgba(24, 214, 81, 0.23);
+    background-color: var(--accentlight);
+    color: var(--accentcolor);
 }
