@@ -38,7 +38,7 @@
             {% else %}
         <div class ="subsubheader">  
                 <div class="total-cost">
-                    <h2>The Total Cost Of This Cart is ${{ total_cost }}</h2>
+                    <h2>The Total Cost Of This Cart is </h2>
                 </div>
                 <!-- Add a form for entering the number of days -->
                 <form id="days-form">
@@ -53,6 +53,13 @@
                 <div id="monthly-estimate"></div>
             
                 <script>
+                        $.ajax({
+                        url: '/get_total_cost',
+                        type: 'GET',
+                        success: function(data) {
+                            $('.total-cost h2').text("The Total Cost Of This Cart is $" + data.total_cost);
+                        }
+                    });
                     function calculate_monthly_estimate(days) {
                         // Get the current total cost
                         var current_total_cost = parseFloat($('.total-cost h2').text().replace('The Total Cost Of This Cart is $', ''));

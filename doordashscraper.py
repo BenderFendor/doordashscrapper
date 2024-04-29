@@ -33,11 +33,18 @@ def scraper(url):
 
     search_part = url.split("/")[-2]
     print("Search Part: ", search_part)
-    fileoutputname = search_part + ".json"
+        
+    if not os.path.exists('jsonfiles'):
+        os.mkdir('jsonfiles')
+    
+    tabname = driver.title
 
+    fileoutput = "jsonfiles/" + tabname + search_part + ".json"
+
+    
     if find.is_enabled():
         print("Element is enabled")
-        with open(fileoutputname, "w", encoding='utf-8') as file:
+        with open(fileoutput, "w", encoding='utf-8') as file:
             print("Printing File...")
             json_data = json.loads(find.get_attribute('innerHTML'))
             json.dump(json_data, file, indent=4)
@@ -64,7 +71,6 @@ def jsonreader(jsonfile):
     print(pageTitle)  # Outputs: ACME (2101 Cottman Avenue),
     
     parsed_data = parsed_data["props"]["pageProps"]["ssrPageProps"]["initialApolloState"]["ROOT_QUERY"]
-
 
     outputname = pageTitle + ".csv"
 
@@ -102,21 +108,26 @@ def jsonreader(jsonfile):
             file.write(f"{item_name},{price},{image_uri}\n")
 
 def main():
-    # searchs = ['meat', 'produce', 'bakery', 'snacks', 'beverages', 'pantry', 'frozen', 'dairy', 'eggs', 'deli', 'household', 'health', 'beauty', 'baby', 'pet', 'alcohol']
-    # basicurl = "https://www.doordash.com/convenience/store/1748872/search/*/?attr_src=home&disable_spell_check=false"
-    # urls = []
-    # for search in searchs:
-    #     urls.append(basicurl.replace("*", search))
-    
-    # print(urls)
+    searchs = ['meat', 'produce', 'bakery', 'snacks', 'beverages', 'pantry', 'frozen', 'dairy', 'eggs', 'deli', 'household', 'health', 'beauty', 'baby', 'pet', 'alcohol']
 
-    # for url in urls:
-    #     scraper(url)
+    # Automate getting mutiple stores many even like just putting a location and it gets all the near by grocery stores idk?
+
+    basicurl = "https://www.doordash.com/convenience/store/24666862/search/*/?attr_src=home&disable_spell_check=false"
+    urls = []
+    for search in searchs:
+        urls.append(basicurl.replace("*", search))
+    
+    print(urls)
+
+    for url in urls:
+        scraper(url)
 
     # get all the json files in the dir
-    jsonfiles = [f for f in os.listdir() if f.endswith(".json")]
+    jsonfiles = [f for f in os.listdir('jsonfiles') if f.endswith(".json")]
 
+    
     for jsons in jsonfiles:
+        jsons = "jsonfiles/" + jsons
         jsonreader(jsons)
 
 if __name__ == "__main__":

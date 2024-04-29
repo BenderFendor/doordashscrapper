@@ -20,9 +20,26 @@
     <header>
         <div class="title">
             <button class="cartbtn" onclick="window.location.href='/show_cart'">Go to Cart</button>
+            <select class="store-dropdown" onchange="getAndShowCart(this.value)">
+                <option value="">Select Store</option>
+                {% for csvfile in csvfiles %}
+                    <option value="{{ csvfile }}">{{ csvfile }}</option>
+                {% endfor %}
+            </select>
+            <script>
+                function getAndShowCart(store) {
+                    fetch('/get_current_csv')
+                        .then(response => response.json())
+                        .then(data => {
+                            const currentCsv = data.current_csv[0];
+                            window.location.href = '/?store=' + store;
+                        });
+                }
+            </script>
         </div>
     </header>
-
+    <script>
+</script>
     <main>
         <div id="grainbackground" class="grainbackground">
             <div class="subheader">
@@ -68,23 +85,7 @@
                     </div>
                     <div class="allitems">
                 <!-- Have this search go over all the boxes some how with css -->
-                    <p id="no-items-found">No items found</p>
-
-                    {% for item in data %}
-                    <div>
-                        <h2 class="itemname">{{ item.item_name }}</h2>
-                        <img src="{{ item['image_url'] }}" alt="{{ item['item_name'] }}">
-                        <p class="itemprice">Price: {{ item.price }}</p>
-                        <form class="add-to-cart-form">
-                            <input type="hidden" name="item_name" value="{{ item.item_name }}">
-                            <input type="hidden" name="price" value="{{ item.price }}">
-                            <input type="hidden" name="image_url" value="{{ item.image_url }}"> <!-- Make sure you have this line -->     
-                            <input type="number" name="count" id="count_{{ item.item_name }}" min="1" value="{{ item.count }}">
-                            <input type="button" class = "addtocart" value="Add to cart" onclick="addToCart('{{ item.item_name }}', '{{ item.price }}','{{ item.image_url }}',document.getElementById('count_{{ item.item_name }}').value)">
-                            <input type="hidden" name="item_name" value="{{ item.item_name }}">
-                        </form>
-                    </div>
-                {% endfor %}  
+                    <p id="no-items-found">No items found</p> 
                </div>
             </div>
         </div>
@@ -92,6 +93,8 @@
             const searchForm = document.getElementById('searchForm');
             const allItemsDiv = document.querySelector('.allitems');
             let page = 1;
+        
+            let isSearchActive = false;
 
             searchForm.addEventListener('submit', function(event) {
                 event.preventDefault();
@@ -101,55 +104,78 @@
                     .then(data => {
                         allItemsDiv.innerHTML = '';
                         data.forEach(item => {
-                            const div = document.createElement('div');
-                            div.innerHTML = `
-                                <h2 class="itemname">${item.item_name}</h2>
-                                <img src="${item.image_url}" alt="${item.item_name}">
-                                <p class="itemprice">Price: ${item.price}</p>
-                                <form class="add-to-cart-form">
-                                    <input type="hidden" name="item_name" value="${item.item_name}">
-                                    <input type="hidden" name="price" value="${item.price}">
-                                    <input type="hidden" name="image_url" value="${item.image_url}">
-                                    <input type="number" name="count" id="count_${item.item_name}" min="1" value="${item.count}">
-                                    <input type="button" class="addtocart" value="Add to cart" onclick="addToCart('${item.item_name}', '${item.price}', '${item.image_url}', document.getElementById('count_${item.item_name}').value)">
-                                </form>
-                            `;
-                            allItemsDiv.appendChild(div);
+                            appendItemToDiv(item);
                         });
+                        isSearchActive = true; // Set the flag to true after a search
                     })
                     .catch(e => {
                         console.error('An error occurred while searching:', e);
                     });
             });
 
-            allItemsDiv.addEventListener('scroll', function() {
-                if ((allItemsDiv.scrollTop + allItemsDiv.clientHeight) >= allItemsDiv.scrollHeight) {
-                    // User has scrolled to the bottom of the div, fetch the next set of data
-                    fetch(`/data?page=${++page}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            data.forEach(item => {
-                                const div = document.createElement('div');
-                                div.innerHTML = `
-                                    <h2 class="itemname">${item.item_name}</h2>
-                                    <img src="${item.image_url}" alt="${item.item_name}">
-                                    <p class="itemprice">Price: ${item.price}</p>
-                                    <form class="add-to-cart-form">
-                                        <input type="hidden" name="item_name" value="${item.item_name}">
-                                        <input type="hidden" name="price" value="${item.price}">
-                                        <input type="hidden" name="image_url" value="${item.image_url}">
-                                        <input type="number" name="count" id="count_${item.item_name}" min="1" value="${item.count}">
-                                        <input type="button" class="addtocart" value="Add to cart" onclick="addToCart('${item.item_name}', '${item.price}', '${item.image_url}', document.getElementById('count_${item.item_name}').value)">
-                                    </form>
-                                `;
-                                allItemsDiv.appendChild(div);
-                            });
-                        })
-                        .catch(e => {
-                            console.error('An error occurred while fetching the data:', e);
-                        });
+            // Your scroll event listener
+            window.addEventListener('scroll', function() {
+                if (!isSearchActive && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                    // Fetch new items only if a search is not active
+                    fetchData();
                 }
             });
+
+            // Reset the flag when the search input is cleared
+            // Reset the page variable when the search input is cleared
+            document.getElementById('search').addEventListener('input', function() {
+                if (this.value === '') {
+                    isSearchActive = false;
+                    page = 1; // Reset the page variable
+                }
+            });
+
+            // Reset the page variable when the page is loaded
+            window.addEventListener('load', function() {
+                page = 1; // Reset the page variable
+            });
+            // Add scroll event listener to .allitems div
+            allItemsDiv.addEventListener('scroll', function() {
+                if (!isSearchActive && this.scrollTop + this.clientHeight >= this.scrollHeight) {
+                    // Fetch new items only if a search is not active and scrolled to the bottom
+                    fetchData();
+                }
+            });
+            function fetchData() {
+                fetch(`/data?page=${page++}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length === 0) {
+                            // If the response is an empty array, stop the recursion
+                            return;
+                        }
+                        data.forEach(item => {
+                            appendItemToDiv(item);
+                        });
+                    })
+                    .catch(e => {
+                        console.error('An error occurred while fetching the data:', e);
+                    });
+            }
+            function appendItemToDiv(item) {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <h2 class="itemname">${item.item_name}</h2>
+                    <img src="${item.image_url}" alt="${item.item_name}">
+                    <p class="itemprice">Price: ${item.price}</p>
+                    <form class="add-to-cart-form">
+                        <input type="hidden" name="item_name" value="${item.item_name}">
+                        <input type="hidden" name="price" value="${item.price}">
+                        <input type="hidden" name="image_url" value="${item.image_url}">
+                        <input type="number" name="count" id="count_${item.item_name}" min="1" value="${item.count}">
+                        <input type="button" class="addtocart" value="Add to cart" onclick="addToCart('${item.item_name}', '${item.price}', '${item.image_url}','${item.count}', '${item.store}', document.getElementById('count_${item.item_name}').value)">
+                    </form>
+                `;
+                allItemsDiv.appendChild(div);
+            }
+        
+            // Fetch initial data
+            fetchData();
         </script>
         
         <!-- Todo add the feature that you can remove each item from the cart by adding a remove button next to each item in the cart. -->
@@ -175,7 +201,7 @@
                 });
 
                 hideShowCart();
-                updateTotalCost();
+                fetchInitialData(); // Call the new function here
             };
         </script>
         </body>
