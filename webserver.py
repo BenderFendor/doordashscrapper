@@ -15,11 +15,10 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'your_secret_key'  # replace with your secret key
 
-    r = redis.Redis(host='localhost', port=6379, db=0)
-    
+    r = redis.Redis(host='redis', port=6379, db=0)    
     # Create a client for the 'items' index
-    client = Client('items')
-
+    client = Client('items', conn=r)
+    
     # Drop the 'items' index if it exists
     try:
         client.info()
@@ -293,4 +292,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True)

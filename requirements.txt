@@ -1,4 +1,7 @@
 Flask
 selenium
 undetected-chromedriver
-fuzzywuzzy
+thefuzz
+redis
+numpy
+redisearch

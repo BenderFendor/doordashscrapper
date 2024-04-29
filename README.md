@@ -14,7 +14,7 @@ To install this project, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/BenderFendor/doordashscrapper.git`
 2. Navigate to the project directory: `cd doordashscrapper`
-3. Install the required packages: `pip install -r requirements.txt`
+3. Install google-chrome if you don't have install as it is need for selenium
 
 ## Usage
 To use this project, follow these steps:
@@ -22,6 +22,11 @@ To use this project, follow these steps:
 1. Run the Doordashscraper.py 
 2. Then run the doordashjsonreader.py
 3. Run the Webserver: `python webserver.py`
+
+Or just use docker
+
+4. Install Docker Compose: `sudo apt install docker-compose`
+5. Start the Docker containers: `docker-compose up`
 
 If you want to scrape Door Dash, use the doordashscraper.py then the doordashjsonreader.py
 
